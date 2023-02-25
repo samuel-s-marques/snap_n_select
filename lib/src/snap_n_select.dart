@@ -21,7 +21,38 @@ class SnapNSelect extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(),
+      body: Column(
+        children: [
+          // TODO: Add camera as background
+          Expanded(
+            // TODO: Replace with GridView
+            child: ListView(
+              shrinkWrap: true,
+              children: [],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  // TODO: Add functionality
+                  onPressed: () {},
+                  // TODO: Change icon
+                  icon: Icon(Icons.folder_copy),
+                ),
+                IconButton(
+                  // TODO: Add functionality
+                  onPressed: () {},
+                  // TODO: Change icon
+                  icon: Icon(Icons.cameraswitch),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
