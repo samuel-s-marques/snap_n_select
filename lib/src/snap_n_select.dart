@@ -7,6 +7,7 @@ class SnapNSelect extends StatefulWidget {
     super.key,
     this.customAppBar,
     this.customBottomBar,
+    this.showCloseIcon = true,
     this.showGalleryIcon = true,
     this.showFlashIcon = true,
     this.showCameraSwitchIcon = true,
@@ -14,6 +15,7 @@ class SnapNSelect extends StatefulWidget {
 
   final PreferredSizeWidget? customAppBar;
   final Widget? customBottomBar;
+  final bool showCloseIcon;
   final bool showGalleryIcon;
   final bool showFlashIcon;
   final bool showCameraSwitchIcon;
@@ -52,12 +54,18 @@ class _SnapNSelectState extends State<SnapNSelect> {
           AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
-            leading: IconButton(
-              onPressed: () {},
-              icon: const RotatedIcon(
-                Icon(Icons.close),
-              ),
-            ),
+            leading: widget.showCloseIcon
+                ? IconButton(
+                    onPressed: () {
+                      if (Navigator.canPop(context)) {
+                        Navigator.pop(context);
+                      }
+                    },
+                    icon: const RotatedIcon(
+                      Icon(Icons.close),
+                    ),
+                  )
+                : null,
             actions: [
               if (widget.showFlashIcon)
                 IconButton(
