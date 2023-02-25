@@ -8,6 +8,8 @@ class SnapNSelect extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           onPressed: () {},
           icon: const Icon(Icons.close),
