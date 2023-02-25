@@ -7,6 +7,10 @@ class SnapNSelect extends StatefulWidget {
     super.key,
     this.customAppBar,
     this.customBottomBar,
+    this.closeIcon,
+    this.flashIcon,
+    this.cameraSwitchIcon,
+    this.galleryIcon,
     this.showCloseIcon = true,
     this.showGalleryIcon = true,
     this.showFlashIcon = true,
@@ -15,6 +19,10 @@ class SnapNSelect extends StatefulWidget {
 
   final PreferredSizeWidget? customAppBar;
   final Widget? customBottomBar;
+  final Icon? closeIcon;
+  final Icon? galleryIcon;
+  final Icon? flashIcon;
+  final Icon? cameraSwitchIcon;
   final bool showCloseIcon;
   final bool showGalleryIcon;
   final bool showFlashIcon;
