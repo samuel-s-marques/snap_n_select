@@ -1,0 +1,12 @@
+include: package:lint/strict.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+
+  strong-mode:
+    implicit-casts: true
+
+linter:
+  rules:
+    avoid_dynamic_calls: false
