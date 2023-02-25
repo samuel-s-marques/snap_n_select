@@ -5,6 +5,21 @@ class SnapNSelect extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.close),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: Icon(Icons.flash_off),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(),
+    );
   }
 }
