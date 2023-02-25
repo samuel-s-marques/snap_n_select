@@ -7,10 +7,16 @@ class SnapNSelect extends StatefulWidget {
     super.key,
     this.customAppBar,
     this.customBottomBar,
+    this.showGalleryIcon = true,
+    this.showFlashIcon = true,
+    this.showCameraSwitchIcon = true,
   });
 
   final PreferredSizeWidget? customAppBar;
   final Widget? customBottomBar;
+  final bool showGalleryIcon;
+  final bool showFlashIcon;
+  final bool showCameraSwitchIcon;
 
   @override
   State<SnapNSelect> createState() => _SnapNSelectState();
@@ -53,15 +59,16 @@ class _SnapNSelectState extends State<SnapNSelect> {
               ),
             ),
             actions: [
-              IconButton(
-                onPressed: () {},
-                icon: const RotatedIcon(
-                  Icon(
-                    Icons.flash_off,
-                    color: Colors.black,
+              if (widget.showFlashIcon)
+                IconButton(
+                  onPressed: () {},
+                  icon: const RotatedIcon(
+                    Icon(
+                      Icons.flash_off,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
       body: Column(
@@ -83,22 +90,24 @@ class _SnapNSelectState extends State<SnapNSelect> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                    // TODO: Add functionality
-                    onPressed: () {},
-                    // TODO: Change icon
-                    icon: const RotatedIcon(
-                      Icon(Icons.folder_copy),
+                  if (widget.showGalleryIcon)
+                    IconButton(
+                      // TODO: Add functionality
+                      onPressed: () {},
+                      // TODO: Change icon
+                      icon: const RotatedIcon(
+                        Icon(Icons.folder_copy),
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    // TODO: Add functionality
-                    onPressed: () {},
-                    // TODO: Change icon
-                    icon: const RotatedIcon(
-                      Icon(Icons.cameraswitch),
+                  if (widget.showCameraSwitchIcon)
+                    IconButton(
+                      // TODO: Add functionality
+                      onPressed: () {},
+                      // TODO: Change icon
+                      icon: const RotatedIcon(
+                        Icon(Icons.cameraswitch),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
