@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class SnapNSelect extends StatelessWidget {
+class SnapNSelect extends StatefulWidget {
   const SnapNSelect({
     super.key,
     this.customAppBar,
@@ -11,10 +11,15 @@ class SnapNSelect extends StatelessWidget {
   final Widget? customBottomBar;
 
   @override
+  State<SnapNSelect> createState() => _SnapNSelectState();
+}
+
+class _SnapNSelectState extends State<SnapNSelect> {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: customAppBar ??
+      appBar: widget.customAppBar ??
           AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -40,8 +45,8 @@ class SnapNSelect extends StatelessWidget {
             ),
           ),
 
-          if (customBottomBar != null)
-            customBottomBar!
+          if (widget.customBottomBar != null)
+            widget.customBottomBar!
           else
             Padding(
               padding: const EdgeInsets.all(10),
