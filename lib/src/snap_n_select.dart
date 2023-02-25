@@ -69,8 +69,8 @@ class _SnapNSelectState extends State<SnapNSelect> {
                         Navigator.pop(context);
                       }
                     },
-                    icon: const RotatedIcon(
-                      Icon(Icons.close),
+                    icon: RotatedIcon(
+                      widget.closeIcon ?? const Icon(Icons.close),
                     ),
                   )
                 : null,
@@ -78,11 +78,12 @@ class _SnapNSelectState extends State<SnapNSelect> {
               if (widget.showFlashIcon)
                 IconButton(
                   onPressed: () {},
-                  icon: const RotatedIcon(
-                    Icon(
-                      Icons.flash_off,
-                      color: Colors.black,
-                    ),
+                  icon: RotatedIcon(
+                    widget.flashIcon ??
+                        const Icon(
+                          Icons.flash_off,
+                          color: Colors.black,
+                        ),
                   ),
                 ),
             ],
@@ -111,8 +112,8 @@ class _SnapNSelectState extends State<SnapNSelect> {
                       // TODO: Add functionality
                       onPressed: () {},
                       // TODO: Change icon
-                      icon: const RotatedIcon(
-                        Icon(Icons.folder_copy),
+                      icon: RotatedIcon(
+                        widget.galleryIcon ?? const Icon(Icons.folder_copy),
                       ),
                     ),
                   if (widget.showCameraSwitchIcon)
@@ -120,8 +121,8 @@ class _SnapNSelectState extends State<SnapNSelect> {
                       // TODO: Add functionality
                       onPressed: () {},
                       // TODO: Change icon
-                      icon: const RotatedIcon(
-                        Icon(Icons.cameraswitch),
+                      icon: RotatedIcon(
+                        widget.cameraSwitchIcon ?? const Icon(Icons.cameraswitch),
                       ),
                     ),
                 ],
