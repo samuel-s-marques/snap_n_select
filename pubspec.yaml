@@ -13,6 +13,7 @@ dependencies:
     sdk: flutter
   permission_handler: ^10.2.0
   photo_gallery: ^1.1.1
+  lint: ^2.0.1
 
 dev_dependencies:
   flutter_test:
