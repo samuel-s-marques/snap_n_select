@@ -4,9 +4,11 @@ class SnapNSelect extends StatelessWidget {
   const SnapNSelect({
     super.key,
     this.customAppBar,
+    this.customBottomBar,
   });
 
   final PreferredSizeWidget? customAppBar;
+  final Widget? customBottomBar;
 
   @override
   Widget build(BuildContext context) {
@@ -37,26 +39,30 @@ class SnapNSelect extends StatelessWidget {
               children: [],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  // TODO: Add functionality
-                  onPressed: () {},
-                  // TODO: Change icon
-                  icon: Icon(Icons.folder_copy),
-                ),
-                IconButton(
-                  // TODO: Add functionality
-                  onPressed: () {},
-                  // TODO: Change icon
-                  icon: Icon(Icons.cameraswitch),
-                ),
-              ],
+
+          if (customBottomBar != null)
+            customBottomBar!
+          else
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    // TODO: Add functionality
+                    onPressed: () {},
+                    // TODO: Change icon
+                    icon: Icon(Icons.folder_copy),
+                  ),
+                  IconButton(
+                    // TODO: Add functionality
+                    onPressed: () {},
+                    // TODO: Change icon
+                    icon: Icon(Icons.cameraswitch),
+                  ),
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
