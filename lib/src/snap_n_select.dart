@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:snap_n_select/src/rotated_icon.dart';
 
 class SnapNSelect extends StatefulWidget {
   const SnapNSelect({
@@ -16,6 +18,27 @@ class SnapNSelect extends StatefulWidget {
 
 class _SnapNSelectState extends State<SnapNSelect> {
   @override
+  void initState() {
+    super.initState();
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -25,12 +48,19 @@ class _SnapNSelectState extends State<SnapNSelect> {
             elevation: 0,
             leading: IconButton(
               onPressed: () {},
-              icon: const Icon(Icons.close),
+              icon: const RotatedIcon(
+                Icon(Icons.close),
+              ),
             ),
             actions: [
               IconButton(
                 onPressed: () {},
-                icon: Icon(Icons.flash_off),
+                icon: const RotatedIcon(
+                  Icon(
+                    Icons.flash_off,
+                    color: Colors.black,
+                  ),
+                ),
               ),
             ],
           ),
@@ -57,13 +87,17 @@ class _SnapNSelectState extends State<SnapNSelect> {
                     // TODO: Add functionality
                     onPressed: () {},
                     // TODO: Change icon
-                    icon: Icon(Icons.folder_copy),
+                    icon: const RotatedIcon(
+                      Icon(Icons.folder_copy),
+                    ),
                   ),
                   IconButton(
                     // TODO: Add functionality
                     onPressed: () {},
                     // TODO: Change icon
-                    icon: Icon(Icons.cameraswitch),
+                    icon: const RotatedIcon(
+                      Icon(Icons.cameraswitch),
+                    ),
                   ),
                 ],
               ),
