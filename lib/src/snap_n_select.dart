@@ -40,6 +40,7 @@ class SnapNSelect extends StatefulWidget {
 class _SnapNSelectState extends State<SnapNSelect> {
   CameraController? cameraController;
   bool isInitialized = false;
+  bool isRearCameraSelected = false;
 
   @override
   void initState() {
@@ -76,11 +77,11 @@ class _SnapNSelectState extends State<SnapNSelect> {
     ]);
   }
 
-  Future<void> initialize() async {
+  Future<void> initialize({int cameraIndex = 0}) async {
     final List<CameraDescription> cameras = await availableCameras();
 
     cameraController = CameraController(
-      cameras.first,
+      cameras[cameraIndex],
       ResolutionPreset.max,
     );
 
@@ -92,6 +93,18 @@ class _SnapNSelectState extends State<SnapNSelect> {
       setState(() {
         isInitialized = true;
       });
+    });
+  }
+
+  void switchCamera() {
+    setState(() {
+      isInitialized = false;
+    });
+
+    initialize(cameraIndex: isRearCameraSelected ? 0 : 1);
+
+    setState(() {
+      isRearCameraSelected = !isRearCameraSelected;
     });
   }
 
@@ -167,7 +180,7 @@ class _SnapNSelectState extends State<SnapNSelect> {
                 if (widget.showCameraSwitchIcon)
                   IconButton(
                     // TODO: Add functionality
-                    onPressed: () {},
+                    onPressed: () => switchCamera(),
                     // TODO: Change icon
                     icon: RotatedIcon(
                       widget.cameraSwitchIcon ?? const Icon(Icons.cameraswitch, color: Colors.white),
