@@ -19,6 +19,7 @@ class SnapNSelect extends StatefulWidget {
     this.showSystemTopOverlay = false,
     this.showSystemBottomOverlay = true,
     this.cameraOverlay,
+    this.resolutionPreset = ResolutionPreset.max,
   });
 
   final PreferredSizeWidget? customAppBar;
@@ -34,6 +35,7 @@ class SnapNSelect extends StatefulWidget {
   final bool showSystemTopOverlay;
   final bool showSystemBottomOverlay;
   final Widget? cameraOverlay;
+  final ResolutionPreset resolutionPreset;
 
   @override
   State<SnapNSelect> createState() => _SnapNSelectState();
@@ -92,7 +94,7 @@ class _SnapNSelectState extends State<SnapNSelect> {
 
     cameraController = CameraController(
       cameras[cameraIndex],
-      ResolutionPreset.max,
+      widget.resolutionPreset,
     );
 
     cameraController!.initialize().then((_) {
