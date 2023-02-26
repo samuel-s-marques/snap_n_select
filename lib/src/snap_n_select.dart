@@ -42,6 +42,12 @@ class _SnapNSelectState extends State<SnapNSelect> {
   bool isInitialized = false;
   bool isRearCameraSelected = false;
   FlashMode? flashMode;
+  Map<FlashMode, IconData> flashModes = {
+    FlashMode.off: Icons.flash_off,
+    FlashMode.auto: Icons.flash_auto,
+    FlashMode.always: Icons.flash_on,
+    FlashMode.torch: Icons.flashlight_on,
+  };
 
   @override
   void initState() {
@@ -126,13 +132,6 @@ class _SnapNSelectState extends State<SnapNSelect> {
       ),
     );
   }
-
-  Map<FlashMode, IconData> flashModes = {
-    FlashMode.off: Icons.flash_off,
-    FlashMode.auto: Icons.flash_auto,
-    FlashMode.always: Icons.flash_on,
-    FlashMode.torch: Icons.flashlight_on,
-  };
 
   void changeFlashMode() {
     switch (flashMode) {
