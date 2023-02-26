@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:snap_n_select/src/rotated_icon.dart';
@@ -33,9 +34,14 @@ class SnapNSelect extends StatefulWidget {
 }
 
 class _SnapNSelectState extends State<SnapNSelect> {
+  CameraController? cameraController;
+  bool isInitialized = false;
+
   @override
   void initState() {
     super.initState();
+
+    initialize();
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -46,6 +52,8 @@ class _SnapNSelectState extends State<SnapNSelect> {
   void dispose() {
     super.dispose();
 
+    cameraController!.dispose();
+
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeRight,
       DeviceOrientation.landscapeLeft,
@@ -54,10 +62,30 @@ class _SnapNSelectState extends State<SnapNSelect> {
     ]);
   }
 
+  Future<void> initialize() async {
+    final List<CameraDescription> cameras = await availableCameras();
+
+    cameraController = CameraController(
+      cameras.first,
+      ResolutionPreset.max,
+    );
+
+    cameraController!.initialize().then((_) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        isInitialized = true;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
+      backgroundColor: Colors.transparent,
       appBar: widget.customAppBar ??
           AppBar(
             backgroundColor: Colors.transparent,
@@ -88,47 +116,44 @@ class _SnapNSelectState extends State<SnapNSelect> {
                 ),
             ],
           ),
-      body: Column(
+      body: Stack(
         children: [
-          // TODO: Add camera as background
-          Expanded(
-            // TODO: Replace with GridView
-            child: ListView(
-              shrinkWrap: true,
-              children: [],
-            ),
-          ),
-
-          if (widget.customBottomBar != null)
-            widget.customBottomBar!
-          else
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (widget.showGalleryIcon)
-                    IconButton(
-                      // TODO: Add functionality
-                      onPressed: () {},
-                      // TODO: Change icon
-                      icon: RotatedIcon(
-                        widget.galleryIcon ?? const Icon(Icons.folder_copy),
-                      ),
-                    ),
-                  if (widget.showCameraSwitchIcon)
-                    IconButton(
-                      // TODO: Add functionality
-                      onPressed: () {},
-                      // TODO: Change icon
-                      icon: RotatedIcon(
-                        widget.cameraSwitchIcon ?? const Icon(Icons.cameraswitch),
-                      ),
-                    ),
-                ],
-              ),
-            ),
+          if (isInitialized) CameraPreview(cameraController!),
         ],
+      ),
+      bottomNavigationBar: Builder(
+        builder: (BuildContext context) {
+          if (widget.customBottomBar != null) {
+            return widget.customBottomBar!;
+          }
+
+          return Padding(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (widget.showGalleryIcon)
+                  IconButton(
+                    // TODO: Add functionality
+                    onPressed: () {},
+                    // TODO: Change icon
+                    icon: RotatedIcon(
+                      widget.galleryIcon ?? const Icon(Icons.folder_copy),
+                    ),
+                  ),
+                if (widget.showCameraSwitchIcon)
+                  IconButton(
+                    // TODO: Add functionality
+                    onPressed: () {},
+                    // TODO: Change icon
+                    icon: RotatedIcon(
+                      widget.cameraSwitchIcon ?? const Icon(Icons.cameraswitch),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
