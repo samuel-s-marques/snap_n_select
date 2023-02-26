@@ -40,7 +40,6 @@ class SnapNSelect extends StatefulWidget {
 class _SnapNSelectState extends State<SnapNSelect> {
   CameraController? cameraController;
   bool isInitialized = false;
-  List<SystemUiOverlay> systemUiOverlays = [];
 
   @override
   void initState() {
@@ -48,6 +47,7 @@ class _SnapNSelectState extends State<SnapNSelect> {
 
     initialize();
 
+    final List<SystemUiOverlay> systemUiOverlays = [];
     if (widget.showSystemTopOverlay) {
       systemUiOverlays.add(SystemUiOverlay.top);
     }
