@@ -16,6 +16,8 @@ class SnapNSelect extends StatefulWidget {
     this.showGalleryIcon = true,
     this.showFlashIcon = true,
     this.showCameraSwitchIcon = true,
+    this.showSystemTopOverlay = false,
+    this.showSystemBottomOverlay = true,
   });
 
   final PreferredSizeWidget? customAppBar;
@@ -28,6 +30,8 @@ class SnapNSelect extends StatefulWidget {
   final bool showGalleryIcon;
   final bool showFlashIcon;
   final bool showCameraSwitchIcon;
+  final bool showSystemTopOverlay;
+  final bool showSystemBottomOverlay;
 
   @override
   State<SnapNSelect> createState() => _SnapNSelectState();
@@ -36,6 +40,7 @@ class SnapNSelect extends StatefulWidget {
 class _SnapNSelectState extends State<SnapNSelect> {
   CameraController? cameraController;
   bool isInitialized = false;
+  List<SystemUiOverlay> systemUiOverlays = [];
 
   @override
   void initState() {
@@ -43,6 +48,15 @@ class _SnapNSelectState extends State<SnapNSelect> {
 
     initialize();
 
+    if (widget.showSystemTopOverlay) {
+      systemUiOverlays.add(SystemUiOverlay.top);
+    }
+
+    if (widget.showSystemBottomOverlay) {
+      systemUiOverlays.add(SystemUiOverlay.bottom);
+    }
+
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: systemUiOverlays);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
