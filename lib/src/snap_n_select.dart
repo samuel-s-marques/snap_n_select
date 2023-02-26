@@ -52,6 +52,9 @@ class _SnapNSelectState extends State<SnapNSelect> {
     FlashMode.always: Icons.flash_on,
     FlashMode.torch: Icons.flashlight_on,
   };
+  double minAvailableZoom = 1.0;
+  double maxAvailableZoom = 1.0;
+  double currentZoomLevel = 1.0;
 
   @override
   void initState() {
@@ -106,6 +109,9 @@ class _SnapNSelectState extends State<SnapNSelect> {
         isInitialized = true;
         flashMode = cameraController!.value.flashMode;
       });
+
+      cameraController!.getMaxZoomLevel().then((value) => maxAvailableZoom = value);
+      cameraController!.getMinZoomLevel().then((value) => minAvailableZoom = value);
     });
   }
 
@@ -197,10 +203,29 @@ class _SnapNSelectState extends State<SnapNSelect> {
           ),
       body: Stack(
         children: [
-          LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
+          Builder(
+            builder: (BuildContext context) {
               if (isInitialized) {
-                return cameraWidget(context);
+                return GestureDetector(
+                  onScaleStart: (ScaleStartDetails details) {
+                    currentZoomLevel = minAvailableZoom;
+                  },
+                  onScaleUpdate: (ScaleUpdateDetails details) async {
+                    final double scale = details.scale;
+
+                    if (scale < 1) {
+                      currentZoomLevel = 1.0;
+                    } else if (scale > 1 && scale < maxAvailableZoom) {
+                      currentZoomLevel = minAvailableZoom * scale;
+                    } else {
+                      currentZoomLevel = maxAvailableZoom;
+                    }
+
+                    setState(() {});
+                    await cameraController!.setZoomLevel(currentZoomLevel);
+                  },
+                  child: cameraWidget(context),
+                );
               }
 
               return const SizedBox.shrink();
