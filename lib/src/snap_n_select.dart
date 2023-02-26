@@ -76,6 +76,7 @@ class _SnapNSelectState extends State<SnapNSelect> {
 
     cameraController!.dispose();
 
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeRight,
       DeviceOrientation.landscapeLeft,
