@@ -227,16 +227,13 @@ class _SnapNSelectState extends State<SnapNSelect> {
                   IconButton(
                     // TODO: Add functionality
                     onPressed: () {},
-                    // TODO: Change icon
                     icon: RotatedIcon(
                       widget.galleryIcon ?? const Icon(Icons.folder_copy, color: Colors.white),
                     ),
                   ),
                 if (widget.showCameraSwitchIcon)
                   IconButton(
-                    // TODO: Add functionality
                     onPressed: () => switchCamera(),
-                    // TODO: Change icon
                     icon: RotatedIcon(
                       widget.cameraSwitchIcon ?? const Icon(Icons.cameraswitch, color: Colors.white),
                     ),
