@@ -108,6 +108,23 @@ class _SnapNSelectState extends State<SnapNSelect> {
     });
   }
 
+  Widget cameraWidget(BuildContext context) {
+    final CameraValue cameraValue = cameraController!.value;
+    final Size size = MediaQuery.of(context).size;
+    double scale = size.aspectRatio * cameraValue.aspectRatio;
+
+    if (scale < 1) {
+      scale = 1 / scale;
+    }
+
+    return Transform.scale(
+      scale: scale,
+      child: Center(
+        child: CameraPreview(cameraController!),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,11 +162,7 @@ class _SnapNSelectState extends State<SnapNSelect> {
           LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
               if (isInitialized) {
-                return SizedBox(
-                  width: constraints.maxWidth,
-                  height: constraints.maxHeight,
-                  child: CameraPreview(cameraController!),
-                );
+                return cameraWidget(context);
               }
 
               return const SizedBox.shrink();
