@@ -99,6 +99,7 @@ class _SnapNSelectState extends State<SnapNSelect> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
+      extendBody: true,
       backgroundColor: Colors.transparent,
       appBar: widget.customAppBar ??
           AppBar(
