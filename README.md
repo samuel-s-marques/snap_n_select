@@ -18,6 +18,19 @@ know whether this package might be useful for them.
 
 TODO: List what your package can do. Maybe include images, gifs, or videos.
 
+- [x] Zoom in-out (WIP)
+- [ ] Take pictures
+- [ ] Record video
+- [ ] Show gallery horizontal list
+- [ ] Show gallery full vertical list
+  - [ ] Show recent pictures and videos
+  - [ ] Show folders
+- [x] Switch cameras
+- [x] Enable flash (auto, always, flashlight, off)
+- [ ] Add documentation
+- [ ] Document parameters, functions and variables
+- [ ] Add more customization features
+
 ## Getting started
 
 TODO: List prerequisites and provide or point to information on how to
