@@ -1,7 +1,9 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart';
 import 'package:snap_n_select/src/rotated_icon.dart';
+import 'package:snap_n_select/src/util.dart';
 
 class SnapNSelect extends StatefulWidget {
   const SnapNSelect({
@@ -20,6 +22,7 @@ class SnapNSelect extends StatefulWidget {
     this.showSystemBottomOverlay = true,
     this.cameraOverlay,
     this.resolutionPreset = ResolutionPreset.max,
+    this.showZoomOverlay = true,
   });
 
   final PreferredSizeWidget? customAppBar;
@@ -36,6 +39,7 @@ class SnapNSelect extends StatefulWidget {
   final bool showSystemBottomOverlay;
   final Widget? cameraOverlay;
   final ResolutionPreset resolutionPreset;
+  final bool showZoomOverlay;
 
   @override
   State<SnapNSelect> createState() => _SnapNSelectState();
@@ -55,6 +59,7 @@ class _SnapNSelectState extends State<SnapNSelect> {
   double minAvailableZoom = 1.0;
   double maxAvailableZoom = 1.0;
   double currentZoomLevel = 1.0;
+  bool showZoomOverlay = false;
 
   @override
   void initState() {
@@ -201,41 +206,116 @@ class _SnapNSelectState extends State<SnapNSelect> {
                 ),
             ],
           ),
-      body: Stack(
-        children: [
-          Builder(
-            builder: (BuildContext context) {
-              if (isInitialized) {
-                return GestureDetector(
-                  onScaleStart: (ScaleStartDetails details) {
-                    currentZoomLevel = minAvailableZoom;
-                  },
-                  onScaleUpdate: (ScaleUpdateDetails details) async {
-                    final double scale = details.scale;
+      body: GestureDetector(
+        onScaleStart: (ScaleStartDetails details) {
+          currentZoomLevel = minAvailableZoom;
 
-                    if (scale < 1) {
-                      currentZoomLevel = 1.0;
-                    } else if (scale > 1 && scale < maxAvailableZoom) {
-                      currentZoomLevel = minAvailableZoom * scale;
-                    } else {
-                      currentZoomLevel = maxAvailableZoom;
-                    }
+          if (widget.showZoomOverlay) {
+            setState(() {
+              showZoomOverlay = true;
+            });
+          }
+        },
+        onScaleUpdate: (ScaleUpdateDetails details) async {
+          final double scale = details.scale;
 
-                    setState(() {});
-                    await cameraController!.setZoomLevel(currentZoomLevel);
-                  },
-                  child: cameraWidget(context),
-                );
+          if (scale < 1) {
+            currentZoomLevel = 1.0;
+          } else if (scale > 1 && scale < maxAvailableZoom) {
+            currentZoomLevel = minAvailableZoom * scale;
+          } else {
+            currentZoomLevel = maxAvailableZoom;
+          }
+
+          setState(() {});
+          await cameraController!.setZoomLevel(currentZoomLevel);
+        },
+        onScaleEnd: (ScaleEndDetails details) async {
+          if (widget.showZoomOverlay) {
+            await Future.delayed(const Duration(milliseconds: 1500), () {
+              if (mounted) {
+                setState(() {
+                  showZoomOverlay = false;
+                });
               }
+            });
+          }
+        },
+        child: Stack(
+          children: [
+            Builder(
+              builder: (BuildContext context) {
+                if (isInitialized) {
+                  return cameraWidget(context);
+                }
 
-              return const SizedBox.shrink();
-            },
-          ),
-          if (widget.cameraOverlay != null)
-            Center(
-              child: widget.cameraOverlay,
+                return const SizedBox.shrink();
+              },
             ),
-        ],
+            Visibility(
+              maintainAnimation: true,
+              maintainSize: true,
+              maintainState: true,
+              visible: showZoomOverlay,
+              child: Center(
+                child: Container(
+                  margin: const EdgeInsets.all(30),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white,
+                    ),
+                  ),
+                  child: Builder(
+                    builder: (BuildContext context) {
+                      const double minWidth = 60;
+
+                      return Container(
+                        width: minWidth * currentZoomLevel,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.blue,
+                          ),
+                        ),
+                        child: Container(
+                          height: 60,
+                          width: 60,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            // TODO: Add optional color to show more the text
+                            color: Colors.transparent,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white,
+                            ),
+                          ),
+                          child: Text(
+                            'x${currentZoomLevel.toPrecision()}',
+                            // TODO: Add optional TextStyle parameter
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+            if (widget.cameraOverlay != null)
+              Center(
+                child: widget.cameraOverlay,
+              ),
+          ],
+        ),
       ),
       bottomNavigationBar: Builder(
         builder: (BuildContext context) {
