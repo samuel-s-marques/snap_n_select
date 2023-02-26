@@ -132,7 +132,19 @@ class _SnapNSelectState extends State<SnapNSelect> {
           ),
       body: Stack(
         children: [
-          if (isInitialized) CameraPreview(cameraController!),
+          LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              if (isInitialized) {
+                return SizedBox(
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  child: CameraPreview(cameraController!),
+                );
+              }
+
+              return const SizedBox.shrink();
+            },
+          ),
         ],
       ),
       bottomNavigationBar: Builder(
