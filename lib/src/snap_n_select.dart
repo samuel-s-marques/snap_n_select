@@ -134,7 +134,6 @@ class _SnapNSelectState extends State<SnapNSelect> {
     FlashMode.torch: Icons.flashlight_on,
   };
 
-  // Get Map value by index and change each press
   void changeFlashMode() {
     switch (flashMode) {
       case FlashMode.off:
