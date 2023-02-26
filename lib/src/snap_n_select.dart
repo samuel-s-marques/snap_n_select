@@ -18,6 +18,7 @@ class SnapNSelect extends StatefulWidget {
     this.showCameraSwitchIcon = true,
     this.showSystemTopOverlay = false,
     this.showSystemBottomOverlay = true,
+    this.cameraOverlay,
   });
 
   final PreferredSizeWidget? customAppBar;
@@ -32,6 +33,7 @@ class SnapNSelect extends StatefulWidget {
   final bool showCameraSwitchIcon;
   final bool showSystemTopOverlay;
   final bool showSystemBottomOverlay;
+  final Widget? cameraOverlay;
 
   @override
   State<SnapNSelect> createState() => _SnapNSelectState();
@@ -202,6 +204,10 @@ class _SnapNSelectState extends State<SnapNSelect> {
               return const SizedBox.shrink();
             },
           ),
+          if (widget.cameraOverlay != null)
+            Center(
+              child: widget.cameraOverlay,
+            ),
         ],
       ),
       bottomNavigationBar: Builder(
