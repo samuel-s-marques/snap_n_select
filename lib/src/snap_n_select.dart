@@ -113,7 +113,7 @@ class _SnapNSelectState extends State<SnapNSelect> {
                       }
                     },
                     icon: RotatedIcon(
-                      widget.closeIcon ?? const Icon(Icons.close),
+                      widget.closeIcon ?? const Icon(Icons.close, color: Colors.white),
                     ),
                   )
                 : null,
@@ -122,11 +122,7 @@ class _SnapNSelectState extends State<SnapNSelect> {
                 IconButton(
                   onPressed: () {},
                   icon: RotatedIcon(
-                    widget.flashIcon ??
-                        const Icon(
-                          Icons.flash_off,
-                          color: Colors.black,
-                        ),
+                    widget.flashIcon ?? const Icon(Icons.flash_off, color: Colors.white),
                   ),
                 ),
             ],
@@ -165,7 +161,7 @@ class _SnapNSelectState extends State<SnapNSelect> {
                     onPressed: () {},
                     // TODO: Change icon
                     icon: RotatedIcon(
-                      widget.galleryIcon ?? const Icon(Icons.folder_copy),
+                      widget.galleryIcon ?? const Icon(Icons.folder_copy, color: Colors.white),
                     ),
                   ),
                 if (widget.showCameraSwitchIcon)
@@ -174,7 +170,7 @@ class _SnapNSelectState extends State<SnapNSelect> {
                     onPressed: () {},
                     // TODO: Change icon
                     icon: RotatedIcon(
-                      widget.cameraSwitchIcon ?? const Icon(Icons.cameraswitch),
+                      widget.cameraSwitchIcon ?? const Icon(Icons.cameraswitch, color: Colors.white),
                     ),
                   ),
               ],
