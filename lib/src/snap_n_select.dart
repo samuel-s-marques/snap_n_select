@@ -230,7 +230,13 @@ class _SnapNSelectState extends State<SnapNSelect> {
                 currentZoomLevel = maxAvailableZoom;
               }
 
-              setState(() {});
+              if (mounted) {
+                if (widget.showZoomOverlay) {
+                  showZoomOverlay = true;
+                }
+
+                setState(() {});
+              }
               await cameraController!.setZoomLevel(currentZoomLevel);
             }
           },
