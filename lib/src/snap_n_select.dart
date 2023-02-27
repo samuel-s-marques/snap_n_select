@@ -62,6 +62,8 @@ class _SnapNSelectState extends State<SnapNSelect> {
   double maxAvailableZoom = 1.0;
   double currentZoomLevel = 1.0;
   bool showZoomOverlay = false;
+  bool isTakingPicture = false;
+  List<XFile> picturesTaken = [];
 
   @override
   void initState() {
@@ -172,6 +174,26 @@ class _SnapNSelectState extends State<SnapNSelect> {
 
     setState(() {});
     cameraController!.setFlashMode(flashMode!);
+  }
+
+  Future<void> takePicture() async {
+    setState(() {
+      isTakingPicture = true;
+    });
+
+    try {
+      final XFile file = await cameraController!.takePicture();
+      picturesTaken.add(file);
+      isTakingPicture = false;
+    } on CameraException catch (exception) {
+      // TODO: Replace or remove exception entirely
+      print(exception);
+      return;
+    }
+
+    setState(() {
+      isTakingPicture = false;
+    });
   }
 
   @override
@@ -333,52 +355,62 @@ class _SnapNSelectState extends State<SnapNSelect> {
                     }
 
                     return Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Padding(
-                          padding: widget.bottomBarPadding ?? const EdgeInsets.only(left: 15, right: 15, bottom: 30),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        SizedBox(
+                          height: 130,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              if (widget.showGalleryIcon)
-                                IconButton(
-                                  // TODO: Add functionality
-                                  onPressed: () {},
-                                  icon: RotatedIcon(
-                                    widget.galleryIcon ?? const Icon(Icons.folder_copy, color: Colors.white),
-                                  ),
-                                ),
-                              GestureDetector(
-                                child: AnimatedContainer(
-                                  width: 60,
-                                  height: 60,
-                                  duration: const Duration(milliseconds: 100),
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: Colors.transparent,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white,
-                                      width: 2.0,
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  if (widget.showGalleryIcon)
+                                    IconButton(
+                                      // TODO: Add functionality
+                                      onPressed: () {},
+                                      icon: RotatedIcon(
+                                        widget.galleryIcon ?? const Icon(Icons.folder_copy, color: Colors.white),
+                                      ),
+                                    ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      takePicture();
+                                    },
+                                    // TODO: Add video recording feature
+                                    onLongPress: () {},
+                                    child: AnimatedContainer(
+                                      width: isTakingPicture ? 90 : 60,
+                                      height: isTakingPicture ? 90 : 60,
+                                      duration: const Duration(milliseconds: 100),
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: Colors.transparent,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: Colors.white,
+                                          width: 3.0,
+                                        ),
+                                      ),
+                                      child: Container(
+                                        width: isTakingPicture ? 70 : 40,
+                                        decoration: const BoxDecoration(
+                                          color: Colors.white,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                  child: Container(
-                                    width: 20,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      shape: BoxShape.circle,
+                                  if (widget.showCameraSwitchIcon)
+                                    IconButton(
+                                      onPressed: () => switchCamera(),
+                                      icon: RotatedIcon(
+                                        widget.cameraSwitchIcon ?? const Icon(Icons.cameraswitch, color: Colors.white),
+                                      ),
                                     ),
-                                  ),
-                                ),
+                                ],
                               ),
-                              if (widget.showCameraSwitchIcon)
-                                IconButton(
-                                  onPressed: () => switchCamera(),
-                                  icon: RotatedIcon(
-                                    widget.cameraSwitchIcon ?? const Icon(Icons.cameraswitch, color: Colors.white),
-                                  ),
-                                ),
                             ],
                           ),
                         ),
