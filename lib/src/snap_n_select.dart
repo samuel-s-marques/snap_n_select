@@ -23,6 +23,7 @@ class SnapNSelect extends StatefulWidget {
     this.cameraOverlay,
     this.resolutionPreset = ResolutionPreset.max,
     this.showZoomOverlay = true,
+    this.bottomBarPadding,
   });
 
   final PreferredSizeWidget? customAppBar;
@@ -40,6 +41,7 @@ class SnapNSelect extends StatefulWidget {
   final Widget? cameraOverlay;
   final ResolutionPreset resolutionPreset;
   final bool showZoomOverlay;
+  final EdgeInsetsGeometry? bottomBarPadding;
 
   @override
   State<SnapNSelect> createState() => _SnapNSelectState();
@@ -314,39 +316,76 @@ class _SnapNSelectState extends State<SnapNSelect> {
               Center(
                 child: widget.cameraOverlay,
               ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Builder(
+                builder: (BuildContext context) {
+                  if (widget.customBottomBar != null) {
+                    return widget.customBottomBar!;
+                  }
+
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: widget.bottomBarPadding ?? const EdgeInsets.only(left: 15, right: 15, bottom: 30),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (widget.showGalleryIcon)
+                              IconButton(
+                                // TODO: Add functionality
+                                onPressed: () {},
+                                icon: RotatedIcon(
+                                  widget.galleryIcon ?? const Icon(Icons.folder_copy, color: Colors.white),
+                                ),
+                              ),
+                            GestureDetector(
+                              child: AnimatedContainer(
+                                width: 60,
+                                height: 60,
+                                duration: const Duration(milliseconds: 100),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2.0,
+                                  ),
+                                ),
+                                child: Container(
+                                  width: 20,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            if (widget.showCameraSwitchIcon)
+                              IconButton(
+                                onPressed: () => switchCamera(),
+                                icon: RotatedIcon(
+                                  widget.cameraSwitchIcon ?? const Icon(Icons.cameraswitch, color: Colors.white),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        height: 120,
+                        width: double.maxFinite,
+                        color: Colors.grey,
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
           ],
         ),
-      ),
-      bottomNavigationBar: Builder(
-        builder: (BuildContext context) {
-          if (widget.customBottomBar != null) {
-            return widget.customBottomBar!;
-          }
-
-          return Padding(
-            padding: const EdgeInsets.all(10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (widget.showGalleryIcon)
-                  IconButton(
-                    // TODO: Add functionality
-                    onPressed: () {},
-                    icon: RotatedIcon(
-                      widget.galleryIcon ?? const Icon(Icons.folder_copy, color: Colors.white),
-                    ),
-                  ),
-                if (widget.showCameraSwitchIcon)
-                  IconButton(
-                    onPressed: () => switchCamera(),
-                    icon: RotatedIcon(
-                      widget.cameraSwitchIcon ?? const Icon(Icons.cameraswitch, color: Colors.white),
-                    ),
-                  ),
-              ],
-            ),
-          );
-        },
       ),
     );
   }
