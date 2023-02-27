@@ -208,9 +208,7 @@ class _SnapNSelectState extends State<SnapNSelect> {
           ),
       body: GestureDetector(
         onScaleStart: (ScaleStartDetails details) {
-          currentZoomLevel = minAvailableZoom;
-
-          if (widget.showZoomOverlay) {
+          if (widget.showZoomOverlay && details.pointerCount >= 2) {
             setState(() {
               showZoomOverlay = true;
             });
@@ -219,19 +217,21 @@ class _SnapNSelectState extends State<SnapNSelect> {
         onScaleUpdate: (ScaleUpdateDetails details) async {
           final double scale = details.scale;
 
-          if (scale < 1) {
-            currentZoomLevel = 1.0;
-          } else if (scale > 1 && scale < maxAvailableZoom) {
-            currentZoomLevel = minAvailableZoom * scale;
-          } else {
-            currentZoomLevel = maxAvailableZoom;
-          }
+          if (details.pointerCount >= 2) {
+            if (scale < 1) {
+              currentZoomLevel = 1.0;
+            } else if (scale > 1 && scale < maxAvailableZoom) {
+              currentZoomLevel = minAvailableZoom * scale;
+            } else {
+              currentZoomLevel = maxAvailableZoom;
+            }
 
-          setState(() {});
-          await cameraController!.setZoomLevel(currentZoomLevel);
+            setState(() {});
+            await cameraController!.setZoomLevel(currentZoomLevel);
+          }
         },
         onScaleEnd: (ScaleEndDetails details) async {
-          if (widget.showZoomOverlay) {
+          if (widget.showZoomOverlay && details.pointerCount >= 2) {
             await Future.delayed(const Duration(milliseconds: 1500), () {
               if (mounted) {
                 setState(() {
