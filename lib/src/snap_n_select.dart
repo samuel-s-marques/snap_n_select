@@ -5,26 +5,28 @@ import 'package:path/path.dart';
 import 'package:snap_n_select/src/rotated_icon.dart';
 import 'package:snap_n_select/src/util.dart';
 
+enum Tab { video, photo }
+
 class SnapNSelect extends StatefulWidget {
-  const SnapNSelect({
-    super.key,
-    this.customAppBar,
-    this.customBottomBar,
-    this.closeIcon,
-    this.flashIcon,
-    this.cameraSwitchIcon,
-    this.galleryIcon,
-    this.showCloseIcon = true,
-    this.showGalleryIcon = true,
-    this.showFlashIcon = true,
-    this.showCameraSwitchIcon = true,
-    this.showSystemTopOverlay = false,
-    this.showSystemBottomOverlay = true,
-    this.cameraOverlay,
-    this.resolutionPreset = ResolutionPreset.max,
-    this.showZoomOverlay = true,
-    this.bottomBarPadding,
-  });
+  const SnapNSelect(
+      {super.key,
+      this.customAppBar,
+      this.customBottomBar,
+      this.closeIcon,
+      this.flashIcon,
+      this.cameraSwitchIcon,
+      this.galleryIcon,
+      this.showCloseIcon = true,
+      this.showGalleryIcon = true,
+      this.showFlashIcon = true,
+      this.showCameraSwitchIcon = true,
+      this.showSystemTopOverlay = false,
+      this.showSystemBottomOverlay = true,
+      this.cameraOverlay,
+      this.resolutionPreset = ResolutionPreset.max,
+      this.showZoomOverlay = true,
+      this.bottomBarPadding,
+      this.defaultTab = Tab.photo});
 
   final PreferredSizeWidget? customAppBar;
   final Widget? customBottomBar;
@@ -42,6 +44,7 @@ class SnapNSelect extends StatefulWidget {
   final ResolutionPreset resolutionPreset;
   final bool showZoomOverlay;
   final EdgeInsetsGeometry? bottomBarPadding;
+  final Tab? defaultTab;
 
   @override
   State<SnapNSelect> createState() => _SnapNSelectState();
@@ -64,6 +67,10 @@ class _SnapNSelectState extends State<SnapNSelect> {
   bool showZoomOverlay = false;
   bool isTakingPicture = false;
   List<XFile> picturesTaken = [];
+  Map<Tab, int> tabMap = {
+    Tab.video: 0,
+    Tab.photo: 1,
+  };
 
   @override
   void initState() {
@@ -232,6 +239,7 @@ class _SnapNSelectState extends State<SnapNSelect> {
           ),
       body: DefaultTabController(
         length: 2,
+        initialIndex: tabMap[widget.defaultTab] ?? 1,
         child: GestureDetector(
           onScaleStart: (ScaleStartDetails details) {
             if (widget.showZoomOverlay && details.pointerCount >= 2) {
