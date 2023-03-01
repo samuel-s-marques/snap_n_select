@@ -240,6 +240,7 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
 
       setState(() {
         isRecording = false;
+        _elapsed = Duration.zero;
       });
     } on CameraException catch (exception) {
       // TODO: Replace or remove exception entirely
