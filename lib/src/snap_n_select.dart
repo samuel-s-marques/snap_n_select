@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:snap_n_select/src/rotated_icon.dart';
@@ -54,7 +55,7 @@ class SnapNSelect extends StatefulWidget {
   State<SnapNSelect> createState() => _SnapNSelectState();
 }
 
-class _SnapNSelectState extends State<SnapNSelect> {
+class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStateMixin {
   CameraController? cameraController;
   bool isInitialized = false;
   bool isRearCameraSelected = false;
@@ -73,6 +74,8 @@ class _SnapNSelectState extends State<SnapNSelect> {
   bool isRecording = false;
   List<XFile> mediaList = [];
   Tab currentTab = Tab.photo;
+  late final Ticker _ticker;
+  Duration _elapsed = Duration.zero;
 
   @override
   void initState() {
@@ -100,6 +103,8 @@ class _SnapNSelectState extends State<SnapNSelect> {
     super.dispose();
 
     cameraController!.dispose();
+
+    _ticker.dispose();
 
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([
@@ -207,6 +212,16 @@ class _SnapNSelectState extends State<SnapNSelect> {
     try {
       await cameraController!.startVideoRecording();
 
+      final DateTime initialTimer = DateTime.now();
+      _ticker = createTicker((elapsed) {
+        final now = DateTime.now();
+
+        setState(() {
+          _elapsed = now.difference(initialTimer);
+        });
+      });
+      _ticker.start();
+
       setState(() {
         isRecording = true;
       });
@@ -221,6 +236,7 @@ class _SnapNSelectState extends State<SnapNSelect> {
     try {
       final XFile file = await cameraController!.stopVideoRecording();
       mediaList.add(file);
+      _ticker.stop();
 
       setState(() {
         isRecording = false;
@@ -282,6 +298,47 @@ class _SnapNSelectState extends State<SnapNSelect> {
     }
   }
 
+  static String getDuration(Duration duration) {
+    final List<String> tokens = [];
+
+    int seconds = duration.inSeconds;
+    final int days = seconds ~/ Duration.secondsPerDay;
+
+    seconds -= days * Duration.secondsPerDay;
+    final int hours = seconds ~/ Duration.secondsPerHour;
+
+    seconds -= hours * Duration.secondsPerHour;
+    final int minutes = seconds ~/ Duration.secondsPerMinute;
+
+    seconds -= minutes * Duration.secondsPerMinute;
+
+    if (days != 0) {
+      tokens.add('$days');
+    }
+
+    if (tokens.isNotEmpty || hours != 0) {
+      if (hours < 10) {
+        tokens.add('0$hours');
+      } else {
+        tokens.add('$hours');
+      }
+    }
+
+    if (minutes < 10) {
+      tokens.add('0$minutes');
+    } else {
+      tokens.add('$minutes');
+    }
+
+    if (seconds < 10) {
+      tokens.add('0$seconds');
+    } else {
+      tokens.add('$seconds');
+    }
+
+    return tokens.join(':');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -292,6 +349,7 @@ class _SnapNSelectState extends State<SnapNSelect> {
           AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
+            centerTitle: true,
             leading: widget.showCloseIcon
                 ? IconButton(
                     onPressed: () {
@@ -302,6 +360,13 @@ class _SnapNSelectState extends State<SnapNSelect> {
                     icon: RotatedIcon(
                       widget.closeIcon ?? const Icon(Icons.close, color: Colors.white),
                     ),
+                  )
+                : null,
+            title: (isRecording || currentTab.name == 'video')
+                ? CustomChip(
+                    label: Text(getDuration(_elapsed)),
+                    style: TextStyle(color: Colors.white),
+                    backgroundColor: Colors.black.withOpacity(0.3),
                   )
                 : null,
             actions: [
