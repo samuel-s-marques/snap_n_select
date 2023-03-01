@@ -71,7 +71,7 @@ class _SnapNSelectState extends State<SnapNSelect> {
   bool showZoomOverlay = false;
   bool isTakingPicture = false;
   bool isRecording = false;
-  List<XFile> picturesTaken = [];
+  List<XFile> mediaList = [];
   Tab currentTab = Tab.photo;
 
   @override
@@ -192,17 +192,44 @@ class _SnapNSelectState extends State<SnapNSelect> {
 
     try {
       final XFile file = await cameraController!.takePicture();
-      picturesTaken.add(file);
-      isTakingPicture = false;
+      mediaList.add(file);
+      setState(() {
+        isTakingPicture = false;
+      });
     } on CameraException catch (exception) {
       // TODO: Replace or remove exception entirely
       print(exception);
       return;
     }
+  }
 
-    setState(() {
-      isTakingPicture = false;
-    });
+  Future<void> startRecording() async {
+    try {
+      await cameraController!.startVideoRecording();
+
+      setState(() {
+        isRecording = true;
+      });
+    } on CameraException catch (exception) {
+      // TODO: Replace or remove exception entirely
+      print(exception);
+      return;
+    }
+  }
+
+  Future<void> stopRecording() async {
+    try {
+      final XFile file = await cameraController!.stopVideoRecording();
+      mediaList.add(file);
+
+      setState(() {
+        isRecording = false;
+      });
+    } on CameraException catch (exception) {
+      // TODO: Replace or remove exception entirely
+      print(exception);
+      return;
+    }
   }
 
   Widget getCameraButton() {
