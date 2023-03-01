@@ -460,7 +460,15 @@ class _SnapNSelectState extends State<SnapNSelect> {
                                   ),
                                 GestureDetector(
                                   onTap: () {
-                                    takePicture();
+                                    if (currentTab.name == 'video') {
+                                      if (!isRecording) {
+                                        startRecording();
+                                      } else {
+                                        stopRecording();
+                                      }
+                                    } else if (currentTab.name == 'photo') {
+                                      takePicture();
+                                    }
                                   },
                                   // TODO: Add video recording feature
                                   onLongPress: () {},
