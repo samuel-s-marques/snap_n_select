@@ -1,5 +1,36 @@
 import 'package:flutter/material.dart';
 
+class CustomChip extends StatelessWidget {
+  const CustomChip({
+    super.key,
+    required this.label,
+    this.style,
+    this.backgroundColor,
+  });
+
+  final Widget label;
+  final TextStyle? style;
+  final Color? backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Theme(
+      data: ThemeData(
+        canvasColor: Colors.transparent,
+        chipTheme: ChipThemeData(
+          backgroundColor: backgroundColor ?? Colors.transparent,
+        ),
+      ),
+      child: Chip(
+        label: label,
+        elevation: 0,
+        labelStyle: style,
+        backgroundColor: backgroundColor,
+      ),
+    );
+  }
+}
+
 class TabChip extends StatelessWidget {
   const TabChip({
     super.key,
