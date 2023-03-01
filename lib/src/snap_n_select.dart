@@ -553,7 +553,7 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
                       ),
                       if (widget.customBottomBar != null)
                         widget.customBottomBar!
-                      else if (widget.showBottomBar)
+                      else if (widget.showBottomBar && !isRecording)
                         Container(
                           height: 100,
                           width: double.maxFinite,
