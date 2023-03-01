@@ -3,30 +3,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:snap_n_select/src/rotated_icon.dart';
+import 'package:snap_n_select/src/tab_chip.dart';
 import 'package:snap_n_select/src/util.dart';
 
 enum Tab { video, photo }
 
 class SnapNSelect extends StatefulWidget {
-  const SnapNSelect(
-      {super.key,
-      this.customAppBar,
-      this.customBottomBar,
-      this.closeIcon,
-      this.flashIcon,
-      this.cameraSwitchIcon,
-      this.galleryIcon,
-      this.showCloseIcon = true,
-      this.showGalleryIcon = true,
-      this.showFlashIcon = true,
-      this.showCameraSwitchIcon = true,
-      this.showSystemTopOverlay = false,
-      this.showSystemBottomOverlay = true,
-      this.cameraOverlay,
-      this.resolutionPreset = ResolutionPreset.max,
-      this.showZoomOverlay = true,
-      this.bottomBarPadding,
-      this.defaultTab = Tab.photo});
+  const SnapNSelect({
+    super.key,
+    this.customAppBar,
+    this.customBottomBar,
+    this.closeIcon,
+    this.flashIcon,
+    this.cameraSwitchIcon,
+    this.galleryIcon,
+    this.showCloseIcon = true,
+    this.showGalleryIcon = true,
+    this.showFlashIcon = true,
+    this.showCameraSwitchIcon = true,
+    this.showSystemTopOverlay = false,
+    this.showSystemBottomOverlay = true,
+    this.cameraOverlay,
+    this.resolutionPreset = ResolutionPreset.max,
+    this.showZoomOverlay = true,
+    this.bottomBarPadding,
+    this.showBottomBar = true,
+    this.defaultTab = Tab.photo,
+  });
 
   final PreferredSizeWidget? customAppBar;
   final Widget? customBottomBar;
@@ -44,6 +47,7 @@ class SnapNSelect extends StatefulWidget {
   final ResolutionPreset resolutionPreset;
   final bool showZoomOverlay;
   final EdgeInsetsGeometry? bottomBarPadding;
+  final bool showBottomBar;
   final Tab? defaultTab;
 
   @override
@@ -66,11 +70,9 @@ class _SnapNSelectState extends State<SnapNSelect> {
   double currentZoomLevel = 1.0;
   bool showZoomOverlay = false;
   bool isTakingPicture = false;
+  bool isRecording = false;
   List<XFile> picturesTaken = [];
-  Map<Tab, int> tabMap = {
-    Tab.video: 0,
-    Tab.photo: 1,
-  };
+  Tab currentTab = Tab.photo;
 
   @override
   void initState() {
@@ -203,6 +205,56 @@ class _SnapNSelectState extends State<SnapNSelect> {
     });
   }
 
+  Widget getCameraButton() {
+    if (currentTab.name == 'photo') {
+      return AnimatedContainer(
+        width: isTakingPicture ? 90 : 60,
+        height: isTakingPicture ? 90 : 60,
+        duration: const Duration(milliseconds: 100),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Colors.white,
+            width: 3.0,
+          ),
+        ),
+        child: Container(
+          width: isTakingPicture ? 70 : 40,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+        ),
+      );
+    } else {
+      return AnimatedContainer(
+        width: isRecording ? 90 : 60,
+        height: isRecording ? 90 : 60,
+        duration: const Duration(milliseconds: 100),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Colors.white,
+            width: 3.0,
+          ),
+        ),
+        child: Container(
+          height: 25,
+          width: 25,
+          decoration: BoxDecoration(
+            color: isRecording ? Colors.red : Colors.white,
+            shape: isRecording ? BoxShape.rectangle : BoxShape.circle,
+            borderRadius: isRecording ? BorderRadius.circular(6) : null,
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -237,191 +289,171 @@ class _SnapNSelectState extends State<SnapNSelect> {
                 ),
             ],
           ),
-      body: DefaultTabController(
-        length: 2,
-        initialIndex: tabMap[widget.defaultTab] ?? 1,
-        child: GestureDetector(
-          onScaleStart: (ScaleStartDetails details) {
-            if (widget.showZoomOverlay && details.pointerCount >= 2) {
-              setState(() {
+      body: GestureDetector(
+        onScaleStart: (ScaleStartDetails details) {
+          if (widget.showZoomOverlay && details.pointerCount >= 2) {
+            setState(() {
+              showZoomOverlay = true;
+            });
+          }
+        },
+        onScaleUpdate: (ScaleUpdateDetails details) async {
+          final double scale = details.scale;
+
+          if (details.pointerCount >= 2) {
+            if (scale < 1) {
+              currentZoomLevel = 1.0;
+            } else if (scale > 1 && scale < maxAvailableZoom) {
+              currentZoomLevel = minAvailableZoom * scale;
+            } else {
+              currentZoomLevel = maxAvailableZoom;
+            }
+
+            if (mounted) {
+              if (widget.showZoomOverlay) {
                 showZoomOverlay = true;
-              });
-            }
-          },
-          onScaleUpdate: (ScaleUpdateDetails details) async {
-            final double scale = details.scale;
-
-            if (details.pointerCount >= 2) {
-              if (scale < 1) {
-                currentZoomLevel = 1.0;
-              } else if (scale > 1 && scale < maxAvailableZoom) {
-                currentZoomLevel = minAvailableZoom * scale;
-              } else {
-                currentZoomLevel = maxAvailableZoom;
               }
 
+              setState(() {});
+            }
+            await cameraController!.setZoomLevel(currentZoomLevel);
+          }
+        },
+        onScaleEnd: (ScaleEndDetails details) async {
+          if (widget.showZoomOverlay && details.pointerCount >= 2) {
+            await Future.delayed(const Duration(milliseconds: 1500), () {
               if (mounted) {
-                if (widget.showZoomOverlay) {
-                  showZoomOverlay = true;
-                }
-
-                setState(() {});
+                setState(() {
+                  showZoomOverlay = false;
+                });
               }
-              await cameraController!.setZoomLevel(currentZoomLevel);
-            }
-          },
-          onScaleEnd: (ScaleEndDetails details) async {
-            if (widget.showZoomOverlay && details.pointerCount >= 2) {
-              await Future.delayed(const Duration(milliseconds: 1500), () {
-                if (mounted) {
-                  setState(() {
-                    showZoomOverlay = false;
-                  });
+            });
+          }
+        },
+        child: Stack(
+          children: [
+            Builder(
+              builder: (BuildContext context) {
+                if (isInitialized) {
+                  return cameraWidget(context);
                 }
-              });
-            }
-          },
-          child: Stack(
-            children: [
-              Builder(
-                builder: (BuildContext context) {
-                  if (isInitialized) {
-                    return cameraWidget(context);
-                  }
 
-                  return const SizedBox.shrink();
-                },
-              ),
-              Visibility(
-                maintainAnimation: true,
-                maintainSize: true,
-                maintainState: true,
-                visible: showZoomOverlay,
-                child: Center(
-                  child: Container(
-                    margin: const EdgeInsets.all(30),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white,
-                      ),
+                return const SizedBox.shrink();
+              },
+            ),
+            Visibility(
+              maintainAnimation: true,
+              maintainSize: true,
+              maintainState: true,
+              visible: showZoomOverlay,
+              child: Center(
+                child: Container(
+                  margin: const EdgeInsets.all(30),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white,
                     ),
-                    child: Builder(
-                      builder: (BuildContext context) {
-                        const double minWidth = 60;
+                  ),
+                  child: Builder(
+                    builder: (BuildContext context) {
+                      const double minWidth = 60;
 
-                        return Container(
-                          width: minWidth * currentZoomLevel,
+                      return Container(
+                        width: minWidth * currentZoomLevel,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.blue,
+                          ),
+                        ),
+                        child: Container(
+                          height: 60,
+                          width: 60,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
+                            // TODO: Add optional color to show more the text
                             color: Colors.transparent,
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: Colors.blue,
+                              color: Colors.white,
                             ),
                           ),
-                          child: Container(
-                            height: 60,
-                            width: 60,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              // TODO: Add optional color to show more the text
-                              color: Colors.transparent,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white,
-                              ),
-                            ),
-                            child: Text(
-                              'x${currentZoomLevel.toPrecision()}',
-                              // TODO: Add optional TextStyle parameter
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                                color: Colors.white,
-                              ),
+                          child: Text(
+                            'x${currentZoomLevel.toPrecision()}',
+                            // TODO: Add optional TextStyle parameter
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Colors.white,
                             ),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
-              if (widget.cameraOverlay != null)
-                Center(
-                  child: widget.cameraOverlay,
-                ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Builder(
-                  builder: (BuildContext context) {
-                    if (widget.customBottomBar != null) {
-                      return widget.customBottomBar!;
-                    }
+            ),
+            if (widget.cameraOverlay != null)
+              Center(
+                child: widget.cameraOverlay,
+              ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Builder(
+                builder: (BuildContext context) {
+                  if (widget.customBottomBar != null) {
+                    return widget.customBottomBar!;
+                  }
 
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          height: 130,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  if (widget.showGalleryIcon)
-                                    IconButton(
-                                      // TODO: Add functionality
-                                      onPressed: () {},
-                                      icon: RotatedIcon(
-                                        widget.galleryIcon ?? const Icon(Icons.folder_copy, color: Colors.white),
-                                      ),
-                                    ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      takePicture();
-                                    },
-                                    // TODO: Add video recording feature
-                                    onLongPress: () {},
-                                    child: AnimatedContainer(
-                                      width: isTakingPicture ? 90 : 60,
-                                      height: isTakingPicture ? 90 : 60,
-                                      duration: const Duration(milliseconds: 100),
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color: Colors.transparent,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: Colors.white,
-                                          width: 3.0,
-                                        ),
-                                      ),
-                                      child: Container(
-                                        width: isTakingPicture ? 70 : 40,
-                                        decoration: const BoxDecoration(
-                                          color: Colors.white,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        height: 130,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                if (widget.showGalleryIcon)
+                                  IconButton(
+                                    // TODO: Add functionality
+                                    onPressed: () {},
+                                    icon: RotatedIcon(
+                                      widget.galleryIcon ?? const Icon(Icons.folder_copy, color: Colors.white),
                                     ),
                                   ),
-                                  if (widget.showCameraSwitchIcon)
-                                    IconButton(
-                                      onPressed: () => switchCamera(),
-                                      icon: RotatedIcon(
-                                        widget.cameraSwitchIcon ?? const Icon(Icons.cameraswitch, color: Colors.white),
-                                      ),
+                                GestureDetector(
+                                  onTap: () {
+                                    takePicture();
+                                  },
+                                  // TODO: Add video recording feature
+                                  onLongPress: () {},
+                                  child: getCameraButton(),
+                                ),
+                                if (widget.showCameraSwitchIcon)
+                                  IconButton(
+                                    onPressed: () => switchCamera(),
+                                    icon: RotatedIcon(
+                                      widget.cameraSwitchIcon ?? const Icon(Icons.cameraswitch, color: Colors.white),
                                     ),
-                                ],
-                              ),
-                            ],
-                          ),
+                                  ),
+                              ],
+                            ),
+                          ],
                         ),
+                      ),
+                      if (widget.customBottomBar != null)
+                        widget.customBottomBar!
+                      else if (widget.showBottomBar)
                         Container(
                           height: 100,
                           width: double.maxFinite,
@@ -430,34 +462,43 @@ class _SnapNSelectState extends State<SnapNSelect> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              TabBar(
-                                indicatorSize: TabBarIndicatorSize.label,
-                                indicator: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(50),
-                                  color: Colors.grey.shade700,
-                                ),
-                                isScrollable: true,
-                                tabs: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6),
-                                    child: Text('video'),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  TabChip(
+                                    label: Text('video'),
+                                    selected: currentTab.name == 'video',
+                                    onSelected: (_) {
+                                      if (currentTab.name == 'photo') {
+                                        setState(() {
+                                          currentTab = Tab.video;
+                                        });
+                                      }
+                                    },
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6),
-                                    child: Text('photo'),
+                                  const SizedBox(width: 15),
+                                  TabChip(
+                                    label: Text('photo'),
+                                    selected: currentTab.name == 'photo',
+                                    onSelected: (_) {
+                                      if (currentTab.name == 'video') {
+                                        setState(() {
+                                          currentTab = Tab.photo;
+                                        });
+                                      }
+                                    },
                                   ),
                                 ],
                               ),
                             ],
                           ),
                         ),
-                      ],
-                    );
-                  },
-                ),
+                    ],
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
