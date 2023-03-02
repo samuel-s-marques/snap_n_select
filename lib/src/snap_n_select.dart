@@ -537,7 +537,16 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
                                     }
                                   },
                                   // TODO: Add video recording feature
-                                  onLongPress: () {},
+                                  onLongPress: () {
+                                    if (!isRecording) {
+                                      startRecording();
+                                    }
+                                  },
+                                  onLongPressUp: () {
+                                    if (isRecording) {
+                                      stopRecording();
+                                    }
+                                  },
                                   child: getCameraButton(),
                                 ),
                                 if (widget.showCameraSwitchIcon)
@@ -554,7 +563,7 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
                       ),
                       if (widget.customBottomBar != null)
                         widget.customBottomBar!
-                      else if (widget.showBottomBar && !isRecording)
+                      else if (widget.showBottomBar)
                         Container(
                           height: 100,
                           width: double.maxFinite,
