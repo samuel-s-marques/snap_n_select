@@ -536,7 +536,6 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
                                       takePicture();
                                     }
                                   },
-                                  // TODO: Add video recording feature
                                   onLongPress: () {
                                     if (!isRecording) {
                                       startRecording();
