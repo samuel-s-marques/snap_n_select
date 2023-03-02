@@ -367,7 +367,7 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
                 ? CustomChip(
                     label: Text(getDuration(_elapsed)),
                     style: TextStyle(color: Colors.white),
-                    backgroundColor: Colors.black.withOpacity(0.3),
+                    backgroundColor: isRecording ? Colors.red : Colors.black.withOpacity(0.3),
                   )
                 : null,
             actions: [
