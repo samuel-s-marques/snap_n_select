@@ -74,7 +74,7 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
   bool isRecording = false;
   List<XFile> mediaList = [];
   Tab currentTab = Tab.photo;
-  late final Ticker _ticker;
+  Ticker? _ticker;
   Duration _elapsed = Duration.zero;
 
   @override
@@ -104,7 +104,9 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
 
     cameraController!.dispose();
 
-    _ticker.dispose();
+    if (_ticker != null) {
+      _ticker!.dispose();
+    }
 
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([
@@ -220,7 +222,7 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
           _elapsed = now.difference(initialTimer);
         });
       });
-      _ticker.start();
+      _ticker!.start();
 
       setState(() {
         isRecording = true;
@@ -236,7 +238,7 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
     try {
       final XFile file = await cameraController!.stopVideoRecording();
       mediaList.add(file);
-      _ticker.stop();
+      _ticker!.stop();
 
       setState(() {
         isRecording = false;
