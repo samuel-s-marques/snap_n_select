@@ -188,7 +188,7 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
     restartCamera(cameraIndex: isRearCameraSelected ? 0 : 1);
   }
 
-  Widget cameraWidget(BuildContext context) {
+  Widget cameraWidget({required BuildContext context, required Widget child}) {
     final CameraValue cameraValue = cameraController!.value;
     final Size size = MediaQuery.of(context).size;
     double scale = size.aspectRatio * cameraValue.aspectRatio;
@@ -200,7 +200,10 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
     return Transform.scale(
       scale: scale,
       child: Center(
-        child: CameraPreview(cameraController!),
+        child: CameraPreview(
+          cameraController!,
+          child: child,
+        ),
       ),
     );
   }
@@ -420,233 +423,253 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
                 ),
             ],
           ),
-      body: GestureDetector(
-        onScaleStart: (ScaleStartDetails details) {
-          if (widget.showZoomOverlay && details.pointerCount >= 2) {
-            setState(() {
-              showZoomOverlay = true;
-            });
-          }
-        },
-        onScaleUpdate: (ScaleUpdateDetails details) async {
-          final double scale = details.scale;
+      body: Stack(
+        children: [
+          Builder(
+            builder: (BuildContext context) {
+              if (isInitialized) {
+                return cameraWidget(
+                  context: context,
+                  child: LayoutBuilder(
+                    builder: (_, BoxConstraints constraints) {
+                      return GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onScaleStart: (ScaleStartDetails details) {
+                          if (widget.showZoomOverlay && details.pointerCount >= 2) {
+                            setState(() {
+                              showZoomOverlay = true;
+                            });
+                          }
+                        },
+                        onScaleUpdate: (ScaleUpdateDetails details) async {
+                          final double scale = details.scale;
 
-          if (details.pointerCount >= 2) {
-            if (scale < 1) {
-              currentZoomLevel = 1.0;
-            } else if (scale > 1 && scale < maxAvailableZoom) {
-              currentZoomLevel = minAvailableZoom * scale;
-            } else {
-              currentZoomLevel = maxAvailableZoom;
-            }
+                          if (details.pointerCount >= 2) {
+                            if (scale < 1) {
+                              currentZoomLevel = 1.0;
+                            } else if (scale > 1 && scale < maxAvailableZoom) {
+                              currentZoomLevel = minAvailableZoom * scale;
+                            } else {
+                              currentZoomLevel = maxAvailableZoom;
+                            }
 
-            if (mounted) {
-              if (widget.showZoomOverlay) {
-                showZoomOverlay = true;
-              }
+                            if (mounted) {
+                              if (widget.showZoomOverlay) {
+                                showZoomOverlay = true;
+                              }
 
-              setState(() {});
-            }
-            await cameraController!.setZoomLevel(currentZoomLevel);
-          }
-        },
-        onScaleEnd: (ScaleEndDetails details) async {
-          if (widget.showZoomOverlay && details.pointerCount >= 2) {
-            await Future.delayed(const Duration(milliseconds: 1500), () {
-              if (mounted) {
-                setState(() {
-                  showZoomOverlay = false;
-                });
-              }
-            });
-          }
-        },
-        child: Stack(
-          children: [
-            Builder(
-              builder: (BuildContext context) {
-                if (isInitialized) {
-                  return cameraWidget(context);
-                }
+                              setState(() {});
+                            }
+                            await cameraController!.setZoomLevel(currentZoomLevel);
+                          }
+                        },
+                        onScaleEnd: (ScaleEndDetails details) async {
+                          if (widget.showZoomOverlay && details.pointerCount >= 2) {
+                            await Future.delayed(const Duration(milliseconds: 1500), () {
+                              if (mounted) {
+                                setState(() {
+                                  showZoomOverlay = false;
+                                });
+                              }
+                            });
+                          }
+                        },
+                        onTapDown: (TapDownDetails details) {
+                          if (cameraController == null) {
+                            return;
+                          }
 
-                return const SizedBox.shrink();
-              },
-            ),
-            Visibility(
-              maintainAnimation: true,
-              maintainSize: true,
-              maintainState: true,
-              visible: showZoomOverlay,
-              child: Center(
-                child: Container(
-                  margin: const EdgeInsets.all(30),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white,
-                    ),
-                  ),
-                  child: Builder(
-                    builder: (BuildContext context) {
-                      const double minWidth = 60;
+                          final offset = Offset(
+                            details.localPosition.dx / constraints.maxWidth,
+                            details.localPosition.dy / constraints.maxHeight,
+                          );
 
-                      return Container(
-                        width: minWidth * currentZoomLevel,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.blue,
-                          ),
-                        ),
-                        child: Container(
-                          height: 60,
-                          width: 60,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            // TODO: Add optional color to show more the text
-                            color: Colors.transparent,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white,
-                            ),
-                          ),
-                          child: Text(
-                            'x${currentZoomLevel.toPrecision()}',
-                            // TODO: Add optional TextStyle parameter
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
+                          cameraController!.setExposurePoint(offset);
+                          cameraController!.setFocusPoint(offset);
+                        },
                       );
                     },
                   ),
+                );
+              }
+
+              return const SizedBox.shrink();
+            },
+          ),
+          Visibility(
+            maintainAnimation: true,
+            maintainSize: true,
+            maintainState: true,
+            visible: showZoomOverlay,
+            child: Center(
+              child: Container(
+                margin: const EdgeInsets.all(30),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white,
+                  ),
+                ),
+                child: Builder(
+                  builder: (BuildContext context) {
+                    const double minWidth = 60;
+
+                    return Container(
+                      width: minWidth * currentZoomLevel,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.blue,
+                        ),
+                      ),
+                      child: Container(
+                        height: 60,
+                        width: 60,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          // TODO: Add optional color to show more the text
+                          color: Colors.transparent,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white,
+                          ),
+                        ),
+                        child: Text(
+                          'x${currentZoomLevel.toPrecision()}',
+                          // TODO: Add optional TextStyle parameter
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
-            if (widget.cameraOverlay != null)
-              Center(
-                child: widget.cameraOverlay,
-              ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Builder(
-                builder: (BuildContext context) {
-                  if (widget.customBottomBar != null) {
-                    return widget.customBottomBar!;
-                  }
+          ),
+          if (widget.cameraOverlay != null)
+            Center(
+              child: widget.cameraOverlay,
+            ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Builder(
+              builder: (BuildContext context) {
+                if (widget.customBottomBar != null) {
+                  return widget.customBottomBar!;
+                }
 
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        height: 130,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                if (widget.showGalleryIcon)
-                                  IconButton(
-                                    // TODO: Add functionality
-                                    onPressed: () {},
-                                    icon: RotatedIcon(
-                                      widget.galleryIcon ?? const Icon(Icons.folder_copy, color: Colors.white),
-                                    ),
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: 130,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              if (widget.showGalleryIcon)
+                                IconButton(
+                                  // TODO: Add functionality
+                                  onPressed: () {},
+                                  icon: RotatedIcon(
+                                    widget.galleryIcon ?? const Icon(Icons.folder_copy, color: Colors.white),
                                   ),
-                                GestureDetector(
-                                  onTap: () {
-                                    if (currentTab.name == 'video') {
-                                      if (!isRecording) {
-                                        startRecording();
-                                      } else {
-                                        stopRecording();
-                                      }
-                                    } else if (currentTab.name == 'photo') {
-                                      takePicture();
-                                    }
-                                  },
-                                  onLongPress: () {
+                                ),
+                              GestureDetector(
+                                onTap: () {
+                                  if (currentTab.name == 'video') {
                                     if (!isRecording) {
                                       startRecording();
-                                    }
-                                  },
-                                  onLongPressUp: () {
-                                    if (isRecording) {
+                                    } else {
                                       stopRecording();
                                     }
-                                  },
-                                  child: getCameraButton(),
-                                ),
-                                if (widget.showCameraSwitchIcon)
-                                  IconButton(
-                                    onPressed: () => switchCamera(),
-                                    icon: RotatedIcon(
-                                      widget.cameraSwitchIcon ?? const Icon(Icons.cameraswitch, color: Colors.white),
-                                    ),
+                                  } else if (currentTab.name == 'photo') {
+                                    takePicture();
+                                  }
+                                },
+                                onLongPress: () {
+                                  if (!isRecording) {
+                                    startRecording();
+                                  }
+                                },
+                                onLongPressUp: () {
+                                  if (isRecording) {
+                                    stopRecording();
+                                  }
+                                },
+                                child: getCameraButton(),
+                              ),
+                              if (widget.showCameraSwitchIcon)
+                                IconButton(
+                                  onPressed: () => switchCamera(),
+                                  icon: RotatedIcon(
+                                    widget.cameraSwitchIcon ?? const Icon(Icons.cameraswitch, color: Colors.white),
                                   ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (widget.customBottomBar != null)
+                      widget.customBottomBar!
+                    else if (widget.showBottomBar)
+                      Container(
+                        height: 100,
+                        width: double.maxFinite,
+                        padding: const EdgeInsets.only(top: 15),
+                        color: Colors.grey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                TabChip(
+                                  label: Text('video'),
+                                  selected: currentTab.name == 'video',
+                                  onSelected: (_) {
+                                    if (currentTab.name == 'photo') {
+                                      setState(() {
+                                        currentTab = Tab.video;
+                                      });
+                                    }
+                                  },
+                                ),
+                                const SizedBox(width: 15),
+                                TabChip(
+                                  label: Text('photo'),
+                                  selected: currentTab.name == 'photo',
+                                  onSelected: (_) {
+                                    if (currentTab.name == 'video') {
+                                      setState(() {
+                                        currentTab = Tab.photo;
+                                      });
+                                    }
+                                  },
+                                ),
                               ],
                             ),
                           ],
                         ),
                       ),
-                      if (widget.customBottomBar != null)
-                        widget.customBottomBar!
-                      else if (widget.showBottomBar)
-                        Container(
-                          height: 100,
-                          width: double.maxFinite,
-                          padding: const EdgeInsets.only(top: 15),
-                          color: Colors.grey,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  TabChip(
-                                    label: Text('video'),
-                                    selected: currentTab.name == 'video',
-                                    onSelected: (_) {
-                                      if (currentTab.name == 'photo') {
-                                        setState(() {
-                                          currentTab = Tab.video;
-                                        });
-                                      }
-                                    },
-                                  ),
-                                  const SizedBox(width: 15),
-                                  TabChip(
-                                    label: Text('photo'),
-                                    selected: currentTab.name == 'photo',
-                                    onSelected: (_) {
-                                      if (currentTab.name == 'video') {
-                                        setState(() {
-                                          currentTab = Tab.photo;
-                                        });
-                                      }
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  );
-                },
-              ),
+                  ],
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
