@@ -496,60 +496,62 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
               return const SizedBox.shrink();
             },
           ),
-          Visibility(
-            maintainAnimation: true,
-            maintainSize: true,
-            maintainState: true,
-            visible: showZoomOverlay,
-            child: Center(
-              child: Container(
-                margin: const EdgeInsets.all(30),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white,
+          IgnorePointer(
+            child: Visibility(
+              maintainAnimation: true,
+              maintainSize: true,
+              maintainState: true,
+              visible: showZoomOverlay,
+              child: Center(
+                child: Container(
+                  margin: const EdgeInsets.all(30),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                child: Builder(
-                  builder: (BuildContext context) {
-                    const double minWidth = 60;
+                  child: Builder(
+                    builder: (BuildContext context) {
+                      const double minWidth = 60;
 
-                    return Container(
-                      width: minWidth * currentZoomLevel,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.blue,
-                        ),
-                      ),
-                      child: Container(
-                        height: 60,
-                        width: 60,
+                      return Container(
+                        width: minWidth * currentZoomLevel,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          // TODO: Add optional color to show more the text
                           color: Colors.transparent,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: Colors.white,
+                            color: Colors.blue,
                           ),
                         ),
-                        child: Text(
-                          'x${currentZoomLevel.toPrecision()}',
-                          // TODO: Add optional TextStyle parameter
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: Colors.white,
+                        child: Container(
+                          height: 60,
+                          width: 60,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            // TODO: Add optional color to show more the text
+                            color: Colors.transparent,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white,
+                            ),
+                          ),
+                          child: Text(
+                            'x${currentZoomLevel.toPrecision()}',
+                            // TODO: Add optional TextStyle parameter
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
