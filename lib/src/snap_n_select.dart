@@ -58,7 +58,7 @@ class SnapNSelect extends StatefulWidget {
 class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   CameraController? cameraController;
   bool isInitialized = false;
-  bool isRearCameraSelected = false;
+  bool isRearCameraSelected = true;
   FlashMode? flashMode;
   Map<FlashMode, IconData> flashModes = {
     FlashMode.off: Icons.flash_off,
@@ -80,11 +80,20 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    setState(() {
-      _appLifecycleState = state;
-    });
-
-    print(state.toString());
+    switch (state) {
+      case AppLifecycleState.resumed:
+        restartCamera(cameraIndex: isRearCameraSelected ? 0 : 1);
+        break;
+      case AppLifecycleState.paused:
+        stopCamera();
+        break;
+      case AppLifecycleState.inactive:
+        stopCamera();
+        break;
+      default:
+        restartCamera(cameraIndex: isRearCameraSelected ? 0 : 1);
+        break;
+    }
 
     super.didChangeAppLifecycleState(state);
   }
@@ -155,16 +164,28 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
     });
   }
 
-  void switchCamera() {
+  void stopCamera() {
     setState(() {
       isInitialized = false;
     });
 
-    initialize(cameraIndex: isRearCameraSelected ? 0 : 1);
+    cameraController!.pausePreview();
+  }
 
+  void restartCamera({int cameraIndex = 0}) {
+    setState(() {
+      isInitialized = false;
+    });
+
+    initialize(cameraIndex: cameraIndex);
+  }
+
+  void switchCamera() {
     setState(() {
       isRearCameraSelected = !isRearCameraSelected;
     });
+
+    restartCamera(cameraIndex: isRearCameraSelected ? 0 : 1);
   }
 
   Widget cameraWidget(BuildContext context) {
