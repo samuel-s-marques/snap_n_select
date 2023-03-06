@@ -464,7 +464,7 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
                           }
                         },
                         onScaleEnd: (ScaleEndDetails details) async {
-                          if (widget.showZoomOverlay && details.pointerCount >= 2) {
+                          if (widget.showZoomOverlay) {
                             await Future.delayed(const Duration(milliseconds: 1500), () {
                               if (mounted) {
                                 setState(() {
