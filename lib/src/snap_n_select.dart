@@ -55,7 +55,7 @@ class SnapNSelect extends StatefulWidget {
   State<SnapNSelect> createState() => _SnapNSelectState();
 }
 
-class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStateMixin {
+class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   CameraController? cameraController;
   bool isInitialized = false;
   bool isRearCameraSelected = false;
@@ -76,10 +76,23 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
   Tab currentTab = Tab.photo;
   Ticker? _ticker;
   Duration _elapsed = Duration.zero;
+  AppLifecycleState? _appLifecycleState;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    setState(() {
+      _appLifecycleState = state;
+    });
+
+    print(state.toString());
+
+    super.didChangeAppLifecycleState(state);
+  }
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     initialize();
 
@@ -115,6 +128,8 @@ class _SnapNSelectState extends State<SnapNSelect> with SingleTickerProviderStat
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+
+    WidgetsBinding.instance.removeObserver(this);
   }
 
   Future<void> initialize({int cameraIndex = 0}) async {
